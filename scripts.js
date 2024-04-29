@@ -110,7 +110,16 @@ function playGame(again = 'Would you like to play "Rock, Paper, Scissors"?') {
 
       } else {
 
-        text = "Invalid input, try again. " + "Would you like to play another round?" + " (round:" + " " + round + "/5)";
+        //Confirm which question they should be seeing on invalid input.
+        if (again === "Would you like to play another match?") {
+
+          text = "Invalid input, try again. Would you like to play another match?";
+
+        } else {
+
+          text = "Invalid input, try again. " + "Would you like to play another round?" + " (round:" + " " + round + "/5)";
+
+        }
 
       }
     }
