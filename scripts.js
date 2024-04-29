@@ -115,6 +115,10 @@ function playGame(again = 'Would you like to play "Rock, Paper, Scissors"?') {
 
           text = "Invalid input, try again. Would you like to play another match?";
 
+        } else if (text === 'Would you like to play "Rock, Paper, Scissors"?') {
+
+          text = 'Invalid input, try again. Would you like to play "Rock, Paper, Scissors"?';
+
         } else {
 
           text = "Invalid input, try again. " + "Would you like to play another round?" + " (round:" + " " + round + "/5)";
