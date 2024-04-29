@@ -33,7 +33,6 @@ function getHumanChoice(text = "Rock, Paper, or Scissors?") {
 }
 
 function playRound(humanScore, computerScore) {
-  console.log("round played");
   let message;
   let thrownWin;
   let thrownLose;
@@ -43,9 +42,7 @@ function playRound(humanScore, computerScore) {
 
 
   [humanChoice, defeatingChoice] = getHumanChoice();
-  console.log(defeatingChoice);
   computerChoice = getComputerChoice();
-  console.log(computerChoice);
 
   if (humanChoice === computerChoice) {
     message = "Nobody. Tie!";
@@ -54,7 +51,6 @@ function playRound(humanScore, computerScore) {
   } else if (defeatingChoice === computerChoice){
     message = "The computer!";
     computerScore++;
-    console.log(computerScore);
     thrownWin = computerChoice;
     thrownLose = humanChoice;
   }
@@ -79,55 +75,89 @@ function playGame(again = 'Would you like to play "Rock, Paper, Scissors"?') {
   let limit = 6;
   let inputValid = false;
 
+  //Begin the rounds.
   while (round < limit) {
-    if (round > 1 && round < 6) {
+
+    //If it isn't a tiebreaker or the first round, it should say this.
+    if (round > 1 && round < 5) {
       text = "Would you like to play another round?" + " (round:" + " " + round + "/5)";
     }
 
+    //Handling for player input each round.
     while (inputValid === false) {
+
       let answer = prompt(text).toLowerCase();
-      console.log(answer);
+
       if(answer === "yes") {
-        console.log("they said yes");
+
         [humanScore, computerScore] = playRound(humanScore, computerScore);
         inputValid = true;
+
       } else if (answer === "no") {
-        console.log("they said no");
-        console.log(round);
+
+        //If the player is telling us no before even playing, or after having done a match,
+        //they clearly do not want to play at all, rather than just wanting to cut the match short.
         if ((again === "Would you like to play another match?") || (round === 1)) {
+
           console.log("I don't want to play anymore")
           return false;
+
         }
+
+        //Set that the match is over, and confirm the input was valid.
         round = limit + 1;
         inputValid = true;
+
       } else {
+
         text = "Invalid input, try again. " + "Would you like to play another round?" + " (round:" + " " + round + "/5)";
+
       }
     }
+
+    //Reseting the validation for the next round.
     inputValid = false;
+
+    //Offer a tiebreaker if round 5 is a tie.
     if (round > 4 && humanScore === computerScore) {
       limit++;
       text = "Would you like to do a tiebreaker round?"  + " (round:" + " " + round + "/5)";
     }
-    round++;
+
+    //If the opponent cannot make a comeback, end the game.
     if (humanScore > 2 || computerScore > 2) {
       round = limit + 1;
     }
+
+    //Increment to proceed to the next round and clear again to prevent skipping the score.
+    again = "Here we go!"
+    round++;
   }
-  text = "Would you like to play?";
+
+  //Assume the game is tied, and check for the other two conditions.
   let gameWinner = "Tied!";
   if (humanScore !== computerScore) {
     gameWinner = humanScore > computerScore ? "The Player!" : "The Computer!";
   }
+
+  //Announce the winner and final score.
   alert("The winner is..." + "\n" + "\n" + gameWinner + "\n" + "\n" + "Final score:" + "\n" + "Player: " + humanScore + " Computer: " + computerScore);
+
+  //Indicate we should ask if they want to play again.
   return true;
 
 }
 
 let iWantToPlay = true;
 let again;
+
+//Place the game in a loop so that it can be replayed as much as is wanted.
 while (iWantToPlay === true) {
+
+  //again will be undefined the first time, thus triggering the default assignment.
   iWantToPlay = playGame(again);
-  again = "Would you like to play another match?"
+  //Acknowledge that this would be a follow-up match being offered.
+  again = "Would you like to play another match?";
+
 }
 
