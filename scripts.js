@@ -1,4 +1,44 @@
 
+
+let scoreboardPlayer = document.querySelector("#player-score");
+let scoreboardComputer = document.querySelector("#computer-score");
+let rpsChoiceContainer = document.querySelector("#rps-choice-container");
+let roundScore = [];
+
+
+
+rpsChoiceContainer.addEventListener("click", (event) => {
+  let pressedButton = event.target;
+  event.preventDefault;
+  roundScore = [];
+
+  switch(pressedButton.id) {
+    case 'rock-button':
+      roundScore = playRound(["rock", "paper"]);
+      break;
+    case 'paper-button':
+      roundScore = playRound(["paper", "scissors"]);
+      break;
+    case 'scissors-button':
+      roundScore = playRound(["scissors", "rock"]);
+      break;
+  }
+  setTimeout(() => {
+    scoreboardPlayer.textContent = `Player: ${roundScore[0]}`;
+    scoreboardComputer.textContent = `CPU: ${roundScore[1]}`;;
+  }, "150");
+
+  round++;
+
+  setTimeout(() => {
+    checkGame();;
+  }, "1000");
+
+  console.log("rps button registered");
+});
+
+
+
 function getComputerChoice() {
     switch(Math.floor(Math.random() * 3)){
   case 0:
@@ -15,33 +55,18 @@ function getComputerChoice() {
     };
 }
 
-function getHumanChoice(text = "Rock, Paper, or Scissors?") {
-  let answer = prompt(text).toLowerCase();
-    switch(answer){
-      case "rock":
-        return ["rock", "paper"];
-        break;
-      case "paper":
-        return ["paper", "scissors"];
-        break;
-      case "scissors":
-        return ["scissors", "rock"];
-        break;
-      default:
-        return getHumanChoice("Invalid input, try again. Rock, Paper, or Scissors?");
-        };
-}
 
-function playRound(humanScore, computerScore) {
+
+function playRound(humanChoiceButton) {
   let message;
   let thrownWin;
   let thrownLose;
-  let humanChoice;
   let computerChoice;
   let defeatingChoice;
+  let humanChoice;
 
 
-  [humanChoice, defeatingChoice] = getHumanChoice();
+  [humanChoice, defeatingChoice] = humanChoiceButton;
   computerChoice = getComputerChoice();
 
   if (humanChoice === computerChoice) {
@@ -60,26 +85,40 @@ function playRound(humanScore, computerScore) {
     thrownWin = humanChoice;
     thrownLose = computerChoice;
   }
-  alert("The winner is:" + "\n" + message + "\n" + "Using " + thrownWin + " against " + thrownLose + "!")
+  setTimeout(() => {
+    alert("The winner is:" + "\n" + message + "\n" + "Using " + thrownWin + " against " + thrownLose + "!");
+  }, "200");
+
   return (
     [humanScore, computerScore]
   );
 }
 
+
+
+
+
+
+
 function playGame(again = 'Would you like to play "Rock, Paper, Scissors"?') {
 
-  let humanScore = 0;
-  let computerScore = 0;
+  gameReset = false;
   let text = again;
-  let round = 1;
-  let limit = 6;
   let inputValid = false;
+  console.log("round: ", round);
 
   //Begin the rounds.
-  while (round < limit) {
+  //If the opponent cannot make a comeback, end the game.
+  if (Math.abs(humanScore - computerScore) > (limit - round) && (round !== limit) && !tieFlag) {
+    console.log("comeback blocked", humanScore, computerScore, "|", limit - round);
+    alert(`There are only ${limit - round} rounds remaining, with a point lead of ${Math.abs(humanScore - computerScore)}`);
+    round = limit + 1;
+  }
+
+  if (round < limit) {
 
     //If it isn't a tiebreaker or the first round, it should say this.
-    if (round > 1 && round < 5) {
+    if (round > 1 && round < 6) {
       text = "Would you like to play another round?" + " (round:" + " " + round + "/5)";
     }
 
@@ -90,7 +129,9 @@ function playGame(again = 'Would you like to play "Rock, Paper, Scissors"?') {
 
       if(answer === "yes") {
 
-        [humanScore, computerScore] = playRound(humanScore, computerScore);
+        tieFlag = false;
+        //FILL IN CSS TARGETING FOR BUTTONS HERE
+        alert("Rock, Paper, or Scissors?");
         inputValid = true;
 
       } else if (answer === "no") {
@@ -106,7 +147,14 @@ function playGame(again = 'Would you like to play "Rock, Paper, Scissors"?') {
 
         //Set that the match is over, and confirm the input was valid.
         round = limit + 1;
+
+        tieFlag = true;
+        playGame();
+
         inputValid = true;
+        gameReset = true;
+
+
 
       } else {
 
@@ -131,46 +179,69 @@ function playGame(again = 'Would you like to play "Rock, Paper, Scissors"?') {
     //Reseting the validation for the next round.
     inputValid = false;
 
-    //Offer a tiebreaker if round 5 is a tie.
-    if (round > 4 && humanScore === computerScore) {
-      limit++;
-      text = "Would you like to do a tiebreaker round?"  + " (round:" + " " + round + "/5)";
-    }
 
-    //If the opponent cannot make a comeback, end the game.
-    if (humanScore > 2 || computerScore > 2) {
-      round = limit + 1;
-    }
+
+
 
     //Increment to proceed to the next round and clear again to prevent skipping the score.
     again = "Here we go!"
-    round++;
+
+    //round increment moved to rps event listener.
+  } else {
+    console.log(humanScore, computerScore);
+    //Offer a tiebreaker if round 5 is a tie.
+    if (humanScore === computerScore && !tieFlag) {
+      console.log("tie detected");
+      limit++;
+      tieFlag = true;
+      text = "Would you like to do a tiebreaker round?"  + " (round:" + " " + round + "/5)";
+      return checkGame(text);
+    }
+
+    //Assume the game is tied, and check for the other two conditions.
+    let gameWinner = "Tied!";
+    if (humanScore !== computerScore) {
+      gameWinner = humanScore > computerScore ? "The Player!" : "The Computer!";
+    }
+
+    //Announce the winner and final score.
+    alert("The winner is..." + "\n" + "\n" + gameWinner + "\n" + "\n" + "Final score:" + "\n" + "Player: " + humanScore + " Computer: " + computerScore);
+
+    //Indicate we should ask if they want to play again.
+    gameReset = true;
+    return true;
   }
-
-  //Assume the game is tied, and check for the other two conditions.
-  let gameWinner = "Tied!";
-  if (humanScore !== computerScore) {
-    gameWinner = humanScore > computerScore ? "The Player!" : "The Computer!";
-  }
-
-  //Announce the winner and final score.
-  alert("The winner is..." + "\n" + "\n" + gameWinner + "\n" + "\n" + "Final score:" + "\n" + "Player: " + humanScore + " Computer: " + computerScore);
-
-  //Indicate we should ask if they want to play again.
   return true;
-
 }
 
+let humanScore = 0;
+let computerScore = 0;
+let limit = 6;
 let iWantToPlay = true;
 let again;
+let gameReset = false;
+let round = 1;
+let tieFlag = false;
 
 //Place the game in a loop so that it can be replayed as much as is wanted.
-while (iWantToPlay === true) {
-
+function checkGame(again) {
+  console.log(again);
   //again will be undefined the first time, thus triggering the default assignment.
-  iWantToPlay = playGame(again);
-  //Acknowledge that this would be a follow-up match being offered.
-  again = "Would you like to play another match?";
+  playGame(again);
 
+  if (gameReset) {
+    //Acknowledge that this would be a follow-up match being offered.
+    again = "Would you like to play another match?";
+    round = 1;
+    limit = 6;
+    tieFlag = false;
+    roundScore = [0, 0];
+    humanScore = 0;
+    computerScore = 0;
+    scoreboardPlayer.textContent = `Player: ${roundScore[0]}`;
+    scoreboardComputer.textContent = `CPU: ${roundScore[1]}`;
+
+    return checkGame(again);
+  }
 }
-
+checkGame();
